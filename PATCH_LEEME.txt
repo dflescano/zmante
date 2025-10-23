@@ -1,0 +1,82 @@
+
+PARCHE — Zona horaria fija + Importador de tareas + Vista previa/borrado de adjuntos (uploads/tasks plano)
+
+1) Copiá estos archivos encima de tu proyecto:
+   - app/tasks_addons.py
+   - app/tasks_import.py
+   - app/diag.py
+   - app/templates/task_files.html
+   - app/templates/tasks_import.html
+   - app/templates/diag_time.html
+   - requirements_patch.txt
+
+2) Registrá los blueprints en app/__init__.py dentro de create_app():
+       from .tasks_addons import bp as tasksx_bp
+       from .tasks_import import bp as tasksimp_bp
+       from .diag import bp as diag_bp
+       app.register_blueprint(tasksx_bp, url_prefix="/tasks")
+       app.register_blueprint(tasksimp_bp, url_prefix="/tasks")
+       app.register_blueprint(diag_bp,    url_prefix="/diagnostico")
+
+3) Asegurá la carpeta de uploads plana (si aún no la tenés) en create_app():
+       base_upload = os.path.join(app.root_path, "uploads")
+       app.config.setdefault("UPLOAD_FOLDER", os.environ.get("UPLOAD_FOLDER", base_upload))
+       os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "tasks"), exist_ok=True)
+
+4) **Zona horaria de la APP y del scheduler** (pegá esto en create_app() luego de crear app):
+       try:
+           from zoneinfo import ZoneInfo
+       except Exception:
+           ZoneInfo = None
+       import pytz
+       def _resolve_tz_name():
+           return os.environ.get("TZ_NAME") or "America/Argentina/Buenos_Aires"
+       def _get_app_tz():
+           name = _resolve_tz_name()
+           if ZoneInfo:
+               try:
+                   return ZoneInfo(name)
+               except Exception:
+                   pass
+           return pytz.timezone(name)
+       app.config["TZ_NAME"] = _resolve_tz_name()
+       app.config["APP_TZ"] = _get_app_tz()
+
+   Y configurá el scheduler con la misma TZ:
+       scheduler.configure(timezone=app.config["APP_TZ"])
+
+   Al crear jobs, pasá timezone=app.config["APP_TZ"]:
+       scheduler.add_job(check_maintenance_job, "interval",
+                         minutes=30, id="check_maintenance",
+                         replace_existing=True, timezone=app.config["APP_TZ"])
+       scheduler.add_job(send_daily_summary, "cron",
+                         hour=vals_env_hour, minute=vals_env_min,
+                         id="daily_summary", replace_existing=True,
+                         timezone=app.config["APP_TZ"])
+
+   **Dentro de los jobs**, usá ahora-aware:
+       from flask import current_app
+       now = datetime.now(current_app.config["APP_TZ"])
+       today = now.date()
+
+5) Importador de tareas:
+   - Ir a /tasks/import
+   - Soporta .xlsx (requiere openpyxl) y .csv
+   - Mapea columnas flexibles (título/estado/prioridad/fechas/comentarios en español o inglés).
+   - Descarga de ejemplo: /tasks/import/sample.csv
+
+6) Vista previa y borrado de adjuntos de tareas:
+   - Asume adjuntos en **uploads/tasks** (todo plano, sin subcarpetas).
+   - Ruta: /tasks/<ID>/files
+   - Abrir/descargar: /tasks/files/<ID>/<filename>
+   - Borrar adjunto (solo admin): POST /tasks/<ID>/files/delete/<filename>
+   - Borrar tarea (solo admin): POST /tasks/<ID>/delete
+   - Si tu modelo Task tiene relación de adjuntos, también la detecta.
+
+7) Diagnóstico de horario:
+   - /diagnostico/horario muestra server vs. local (TZ de la app) vs. UTC.
+   - Si la hora no coincide, definí TZ_NAME en tu entorno o en tu Config y reiniciá.
+
+8) Requisitos extra (instalá con pip):
+       pip install -r requirements_patch.txt
+

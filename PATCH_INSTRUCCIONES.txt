@@ -1,0 +1,38 @@
+
+PARCHE — REPORTES (PDF/Excel) + INVENTARIO  — listo para copiar encima (sin romper nada)
+
+1) Copiar TODO el contenido de este ZIP sobre tu proyecto, respetando rutas:
+   - app/utils_export.py
+   - app/reports.py
+   - app/inventory_models.py
+   - app/inventory.py
+   - app/templates/reports_dashboard.html
+   - app/templates/report_tasks.html
+   - app/templates/report_pcs.html
+   - app/templates/inventory_list.html
+   - app/templates/inventory_form.html
+   - app/templates/inventory_detail.html
+
+2) Editar app/__init__.py (dentro de create_app), junto a tus otros imports/blueprints:
+   a) IMPORTS:
+       from .reports import bp as reports_bp
+       from .inventory import bp as inventory_bp
+       from .inventory_models import InventoryItem    # para que db.create_all cree la tabla
+   b) REGISTRO:
+       app.register_blueprint(reports_bp, url_prefix="/reports")
+       app.register_blueprint(inventory_bp, url_prefix="/inventory")
+
+3) Agregar links en app/templates/layout.html:
+   <a href="{{ url_for('reports.dashboard') }}" class="hover:underline">Reportes</a>
+   <a href="{{ url_for('inventory.list_items') }}" class="hover:underline">Inventario</a>
+
+4) Reiniciar la app.
+   - Panel de reportes:   /reports
+   - Tareas CSV/XLSX/PDF: /reports/tasks(.csv|.xlsx|.pdf)
+   - PCs   CSV/XLSX/PDF:  /reports/pcs(.csv|.xlsx|.pdf)
+   - Inventario CRUD:     /inventory
+
+Notas:
+- Excel (XLSX) usa openpyxl si está instalado; si no, cae a CSV automáticamente (no rompe).
+- PDF usa reportlab si está instalado; si no, cae a CSV (podés imprimir a PDF desde el navegador). 
+  Para activar PDF nativo:  pip install reportlab
