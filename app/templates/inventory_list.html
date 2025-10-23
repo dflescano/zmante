@@ -1,0 +1,80 @@
+
+{% extends 'layout.html' %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-3">Inventario</h1>
+
+<form method="get" class="bg-white rounded shadow p-3 mb-3 flex gap-2 flex-wrap">
+  <div>
+    <label class="text-sm text-gray-600">Tipo</label>
+    <select name="kind" class="border rounded px-2 py-1">
+      <option value="">(todos)</option>
+      {% for k in KINDS %}
+      <option value="{{ k }}" {% if k==kind %}selected{% endif %}>{{ k }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="text-sm text-gray-600">Estado</label>
+    <select name="status" class="border rounded px-2 py-1">
+      <option value="">(todos)</option>
+      {% for s in STATUSES %}
+      <option value="{{ s }}" {% if s==status %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-end">
+    <button class="px-3 py-2 bg-blue-600 text-white rounded">Filtrar</button>
+  </div>
+  <div class="flex items-end gap-2">
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.new_item') }}">Nuevo</a>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.export_csv') }}">CSV</a>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.export_xlsx') }}">Excel</a>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.export_pdf') }}">PDF</a>
+  </div>
+</form>
+
+<div class="bg-white rounded shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-3 py-2 text-left">Tipo</th>
+        <th class="px-3 py-2 text-left">Nombre</th>
+        <th class="px-3 py-2 text-left">Marca</th>
+        <th class="px-3 py-2 text-left">Modelo</th>
+        <th class="px-3 py-2 text-left">Serie</th>
+        <th class="px-3 py-2 text-left">Ubicación</th>
+        <th class="px-3 py-2 text-left">Asignado</th>
+        <th class="px-3 py-2 text-left">Estado</th>
+        <th class="px-3 py-2"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for i in items %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-3 py-2">{{ i.kind }}</td>
+        <td class="px-3 py-2">{{ i.name }}</td>
+        <td class="px-3 py-2">{{ i.brand or '—' }}</td>
+        <td class="px-3 py-2">{{ i.model or '—' }}</td>
+        <td class="px-3 py-2">{{ i.serial or '—' }}</td>
+        <td class="px-3 py-2">{{ i.location or '—' }}</td>
+        <td class="px-3 py-2">{{ i.assigned_to or '—' }}</td>
+        <td class="px-3 py-2">{{ i.status }}</td>
+        <td class="px-3 py-2">
+          <a class="text-blue-700 hover:underline" href="{{ url_for('inventory.view_item', item_id=i.id) }}">Ver</a> ·
+          <a class="text-blue-700 hover:underline" href="{{ url_for('inventory.edit_item', item_id=i.id) }}">Editar</a>
+          {% if current_user.role == 'admin' %} ·
+          <form method="post" action="{{ url_for('inventory.delete_item', item_id=i.id) }}" class="inline" onsubmit="return confirm('¿Eliminar este ítem?');">
+            <button class="text-red-700 hover:underline" style="background:none;border:none;padding:0;">Eliminar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      {% if items|length == 0 %}
+      <tr><td colspan="9" class="px-3 py-4 text-center text-gray-500">Sin datos.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard - Mantenimiento de PC{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Estado de PCs</h1>
+  <div class="flex gap-2">
+    <form method="get" class="flex items-center gap-2">
+      <select name="f" class="border rounded px-2 py-2">
+        <option value="todos" {{ 'selected' if filt=='todos' }}>Todos</option>
+        <option value="ok" {{ 'selected' if filt=='ok' }}>OK</option>
+        <option value="por_vencer" {{ 'selected' if filt=='por_vencer' }}>Por vencer</option>
+        <option value="alerta" {{ 'selected' if filt=='alerta' }}>Alerta + Sin mant.</option>
+        <option value="sin_mantenimiento" {{ 'selected' if filt=='sin_mantenimiento' }}>Sin mantenimiento</option>
+      </select>
+      <button class="px-3 py-2 bg-gray-700 text-white rounded">Filtrar</button>
+    </form>
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('export.excel') }}" class="px-3 py-2 bg-green-700 text-white rounded-lg">Excel (PCs)</a>
+    {% endif %}
+  </div>
+</div>
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left text-sm font-semibold">PC</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold">Usuario PC</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold">Usuario físico</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold">Último mantenimiento</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold">Estado</th>
+        <th class="px-4 py-2"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for pc in pcs %}
+      {% set last = pc.last_maintenance() %}
+      {% set st = compute_status(pc) %}
+      {% set klass = 'bg-green-100 text-green-700' if 'OK' in st else ('bg-yellow-100 text-yellow-800' if 'POR VENCER' in st else 'bg-red-100 text-red-700') %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">{{ pc.name }}</td>
+        <td class="px-4 py-2">{{ pc.pc_username or '-' }}</td>
+        <td class="px-4 py-2">{{ pc.physical_user or '-' }}</td>
+        <td class="px-4 py-2">{{ last.date_performed.strftime('%Y-%m-%d %H:%M') if last else '—' }}</td>
+        <td class="px-4 py-2"><span class="px-2 py-1 rounded text-xs font-semibold {{ klass }}">{{ st }}</span></td>
+        <td class="px-4 py-2 text-right"><a href="{{ url_for('main.pc_detail', pc_id=pc.id) }}" class="text-blue-600 hover:underline">Ver</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-6 bg-white rounded-lg shadow p-4">
+  <h2 class="font-semibold mb-2">Exportar actividad por rango</h2>
+  <form class="flex flex-wrap items-end gap-2" method="get">
+    <div><label class="block text-sm text-gray-600">Desde</label><input type="date" name="start" class="border rounded px-2 py-2" /></div>
+    <div><label class="block text-sm text-gray-600">Hasta</label><input type="date" name="end" class="border rounded px-2 py-2" /></div>
+    <button class="px-3 py-2 bg-green-700 text-white rounded" formaction="{{ url_for('export.actividad_excel') }}">Excel</button>
+    <button class="px-3 py-2 bg-blue-700 text-white rounded" formaction="{{ url_for('export.actividad_pdf') }}">PDF</button>
+  </form>
+  <p class="text-xs text-gray-500 mt-2">Exporta mantenimientos y backups del rango (inclusive).</p>
+</div>
+{% endblock %}

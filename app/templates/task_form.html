@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+{% block title %}{{ 'Editar' if task else 'Nueva' }} tarea{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ 'Editar' if task else 'Nueva' }} tarea</h1>
+
+<form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-2 gap-3">
+  <div>
+    <label class="font-semibold">Título *</label>
+    <input name="title" class="border rounded w-full px-2 py-1" value="{{ task.title if task else '' }}" required>
+  </div>
+  <div>
+    <label class="font-semibold">PC</label>
+    <select name="pc_id" class="border rounded w-full px-2 py-1">
+      <option value="">(Sin asociar)</option>
+      {% for pc in pcs %}
+        <option value="{{ pc.id }}" {% if task and task.pc_id==pc.id %}selected{% endif %}>{{ pc.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="font-semibold">Estado</label>
+    <select name="status" class="border rounded w-full px-2 py-1">
+      {% for s in ('pendiente','en_progreso','finalizada') %}
+        <option value="{{ s }}" {% if task and task.status==s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="font-semibold">Prioridad</label>
+    <select name="priority" class="border rounded w-full px-2 py-1">
+      {% for p in ('baja','media','alta') %}
+        <option value="{{ p }}" {% if task and task.priority==p %}selected{% endif %}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="font-semibold">Inicio</label>
+    <input type="date" name="start_date" class="border rounded w-full px-2 py-1" value="{{ task.start_date if task and task.start_date else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Fin</label>
+    <input type="date" name="end_date" class="border rounded w-full px-2 py-1" value="{{ task.end_date if task and task.end_date else '' }}">
+  </div>
+  <div class="md:col-span-2">
+    <label class="font-semibold">Problema *</label>
+    <textarea name="problem" class="border rounded w-full px-2 py-1" rows="3" required>{{ task.problem if task else '' }}</textarea>
+  </div>
+  <div class="md:col-span-2">
+    <label class="font-semibold">Solución</label>
+    <textarea name="solution" class="border rounded w-full px-2 py-1" rows="3">{{ task.solution if task else '' }}</textarea>
+  </div>
+  <div class="md:col-span-2">
+    <label class="font-semibold">Comentarios</label>
+    <textarea name="comments" class="border rounded w-full px-2 py-1" rows="2">{{ task.comments if task else '' }}</textarea>
+  </div>
+  <div class="md:col-span-2">
+    <label class="font-semibold">Adjuntos (imágenes o PDF, múltiples)</label>
+    <input type="file" name="files" multiple class="border rounded w-full px-2 py-1">
+    {% if task and task.attachments.count() %}
+      <div class="mt-2 text-sm text-gray-600">Adjuntos existentes: {{ task.attachments.count() }}</div>
+    {% endif %}
+  </div>
+
+  <div class="md:col-span-2 flex gap-2">
+    <button class="px-3 py-2 bg-blue-600 text-white rounded">Guardar</button>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('tasks.list_tasks') }}">Volver</a>
+    {% if task %}
+      <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('tasks.view_task', task_id=task.id) }}">Ver</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+{% block title %}Tareas{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Tareas</h1>
+  <a href="{{ url_for('tasks.new_task') }}" class="px-3 py-2 bg-green-600 text-white rounded">Nueva tarea</a>
+</div>
+
+<form method="get" class="bg-white p-3 rounded shadow mb-3 grid grid-cols-1 md:grid-cols-5 gap-2">
+  <input type="text" name="q" placeholder="Buscar texto..." value="{{ text }}" class="border rounded px-2 py-1">
+  <select name="status" class="border rounded px-2 py-1">
+    <option value="">Estado (todos)</option>
+    {% for s in ('pendiente','en_progreso','finalizada') %}
+      <option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>
+    {% endfor %}
+  </select>
+  <select name="priority" class="border rounded px-2 py-1">
+    <option value="">Prioridad (todas)</option>
+    {% for p in ('baja','media','alta') %}
+      <option value="{{ p }}" {% if priority==p %}selected{% endif %}>{{ p }}</option>
+    {% endfor %}
+  </select>
+  <select name="pc_id" class="border rounded px-2 py-1">
+    <option value="">PC (todas)</option>
+    {% for pc in pcs %}
+      <option value="{{ pc.id }}" {% if sel_pc==pc.id|string %}selected{% endif %}>{{ pc.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="px-3 py-1 bg-blue-600 text-white rounded">Filtrar</button>
+</form>
+
+<div class="bg-white rounded shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-3 py-2 text-left">Título</th>
+        <th class="px-3 py-2">PC</th>
+        <th class="px-3 py-2">Estado</th>
+        <th class="px-3 py-2">Prioridad</th>
+        <th class="px-3 py-2">Inicio</th>
+        <th class="px-3 py-2">Fin</th>
+        <th class="px-3 py-2">Adjuntos</th>
+        <th class="px-3 py-2"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for t in tasks %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-3 py-2"><a class="text-blue-700 hover:underline" href="{{ url_for('tasks.view_task', task_id=t.id) }}">{{ t.title }}</a></td>
+        <td class="px-3 py-2">{{ t.pc.name if t.pc else '—' }}</td>
+        <td class="px-3 py-2">{{ t.status }}</td>
+        <td class="px-3 py-2">{{ t.priority }}</td>
+        <td class="px-3 py-2">{{ t.start_date or '—' }}</td>
+        <td class="px-3 py-2">{{ t.end_date or '—' }}</td>
+        <td class="px-3 py-2">{{ t.attachments.count() }}</td>
+        <td class="px-3 py-2"><a class="text-blue-600 hover:underline" href="{{ url_for('tasks.edit_task', task_id=t.id) }}">Editar</a></td>
+		<td>{{ t.created_at|localtime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ t.updated_at|localtime("%Y-%m-%d %H:%M") }}</td>
+      </tr>
+      {% endfor %}
+      {% if tasks|length == 0 %}
+      <tr><td colspan="8" class="px-3 py-4 text-center text-gray-500">Sin tareas.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+

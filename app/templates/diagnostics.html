@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% block title %}Diagnóstico{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Diagnóstico</h1>
+<div class="bg-white rounded-lg shadow p-4 mb-4">
+  <h2 class="font-semibold mb-2">Configuración actual</h2>
+  <div class="text-sm">
+    <div>SMTP_HOST: <b>{{ cfg.smtp_host if cfg else '-' }}</b></div>
+    <div>SMTP_PORT: <b>{{ cfg.smtp_port if cfg else '-' }}</b></div>
+    <div>SMTP_TLS: <b>{{ 'Sí' if (cfg and cfg.smtp_tls) else 'No' }}</b></div>
+    <div>MAIL_FROM: <b>{{ cfg.mail_from if cfg else '-' }}</b></div>
+    <div>MAIL_TO: <b>{{ cfg.mail_to if cfg else '-' }}</b></div>
+    <div>maintenance_days: <b>{{ cfg.maintenance_days if cfg else 7 }}</b></div>
+    <div>backup_days: <b>{{ cfg.backup_days if cfg else 7 }}</b></div>
+    <div>alerts_enabled: <b>{{ 'Sí' if (cfg and cfg.alerts_enabled) else 'No' }}</b></div>
+    <div>summary_daily: <b>{{ 'Sí' if (cfg and cfg.summary_daily) else 'No' }}</b></div>
+  </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">PC</th>
+        <th class="px-4 py-2 text-left">Últ. mantenimiento</th>
+        <th class="px-4 py-2 text-left">Días (mant.)</th>
+        <th class="px-4 py-2 text-left">¿Alerta mant.?</th>
+        <th class="px-4 py-2 text-left">Últ. backup</th>
+        <th class="px-4 py-2 text-left">Días (backup)</th>
+        <th class="px-4 py-2 text-left">¿Alerta backup?</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for r in rows %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">{{ r.pc }}</td>
+        <td class="px-4 py-2">{{ r.last_maint }}</td>
+        <td class="px-4 py-2">{{ r.age_maint if r.age_maint is not none else 'None' }}</td>
+        <td class="px-4 py-2">{{ 'Sí' if r.should_alert_maint else 'No' }}</td>
+        <td class="px-4 py-2">{{ r.last_backup }}</td>
+        <td class="px-4 py-2">{{ r.age_backup if r.age_backup is not none else 'None' }}</td>
+        <td class="px-4 py-2">{{ 'Sí' if r.should_alert_backup else 'No' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

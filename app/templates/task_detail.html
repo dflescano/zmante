@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+{% block title %}Tarea #{{ task.id }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Tarea #{{ task.id }} — {{ task.title }}</h1>
+  <div class="flex gap-2">
+    <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="px-3 py-2 bg-blue-600 text-white rounded">Editar</a>
+	<a class="px-3 py-2 bg-gray-300 rounded"
+   href="{{ url_for('tasksx.files', task_id=task.id) }}">
+   Archivos (vista previa)
+   </a>
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <form method="post" action="{{ url_for('tasks.delete_task', task_id=task.id) }}" onsubmit="return confirm('¿Borrar esta tarea?');">
+      <button class="px-3 py-2 bg-red-600 text-white rounded">Borrar</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+  <div class="bg-white rounded shadow p-3">
+    <div><b>PC:</b> {{ task.pc.name if task.pc else '—' }}</div>
+    <div><b>Estado:</b> {{ task.status }}</div>
+    <div><b>Prioridad:</b> {{ task.priority }}</div>
+    <div><b>Inicio:</b> {{ task.start_date or '—' }}</div>
+    <div><b>Fin:</b> {{ task.end_date or '—' }}</div>
+    <div class="mt-2"><b>Problema:</b><br>{{ task.problem|replace('\n','<br>')|safe }}</div>
+    <div class="mt-2"><b>Solución:</b><br>{{ task.solution|default('—')|replace('\n','<br>')|safe }}</div>
+    <div class="mt-2"><b>Comentarios:</b><br>{{ task.comments|default('—')|replace('\n','<br>')|safe }}</div>
+	<p class="text-gray-600 text-sm">
+	Creada: {{ task.created_at|localtime("%Y-%m-%d %H:%M") }}
+	— Actualizada: {{ task.updated_at|localtime("%Y-%m-%d %H:%M") }}
+	</p>
+  </div>
+
+  <div class="bg-white rounded shadow p-3">
+    <h2 class="font-semibold mb-2">Adjuntos ({{ task.attachments.count() }})</h2>
+    {% if task.attachments.count() == 0 %}
+      <div class="text-gray-500">Sin archivos.</div>
+    {% else %}
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {% for a in task.attachments %}
+          <div class="border rounded p-2">
+            {% set ext = (a.original_name or a.filename).split('.')[-1].lower() %}
+            {% if ext in ['png','jpg','jpeg','gif'] %}
+              <img src="{{ url_for('tasks.download_attachment', att_id=a.id) }}" alt="{{ a.original_name }}" class="w-full h-32 object-contain mb-1">
+            {% else %}
+              <div class="h-32 flex items-center justify-center text-gray-600">PDF/Archivo</div>
+            {% endif %}
+            <div class="truncate text-sm">{{ a.original_name or a.filename }}</div>
+            <div class="text-xs text-gray-500">{{ a.content_type or '' }}</div>
+            <div class="flex items-center gap-2 mt-1">
+              <a class="text-blue-700 hover:underline" href="{{ url_for('tasks.download_attachment', att_id=a.id) }}">Descargar</a>
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
+              <form method="post" action="{{ url_for('tasks.delete_attachment', att_id=a.id) }}" onsubmit="return confirm('¿Eliminar adjunto?');">
+                <button class="text-red-700 hover:underline">Borrar</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-4">
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('tasks.list_tasks') }}">Volver</a>
+</div>
+{% endblock %}

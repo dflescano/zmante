@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}PCs{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">PCs</h1>
+  {% if current_user.role == 'admin' %}
+  <a href="{{ url_for('main.pc_new') }}" class="px-3 py-2 bg-gray-900 text-white rounded-lg">Nueva PC</a>
+  {% endif %}
+</div>
+<form class="mb-4" method="get">
+  <input name="q" value="{{ q }}" placeholder="Buscar por PC, usuario PC, usuario físico" class="w-full md:w-1/2 border rounded px-3 py-2" />
+</form>
+<div class="overflow-x-auto bg-white rounded-lg shadow">
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-100">
+      <tr><th class="px-4 py-2 text-left text-sm font-semibold">PC</th><th class="px-4 py-2 text-left text-sm font-semibold">Usuario PC</th><th class="px-4 py-2 text-left text-sm font-semibold">Usuario físico</th><th class="px-4 py-2"></th></tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for pc in pcs %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">{{ pc.name }}</td>
+        <td class="px-4 py-2">{{ pc.pc_username or '-' }}</td>
+        <td class="px-4 py-2">{{ pc.physical_user or '-' }}</td>
+        <td class="px-4 py-2 text-right"><a href="{{ url_for('main.pc_detail', pc_id=pc.id) }}" class="text-blue-600 hover:underline">Abrir</a></td>
+      </tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

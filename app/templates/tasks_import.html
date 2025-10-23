@@ -1,0 +1,29 @@
+
+{% extends 'layout.html' %}
+{% block title %}Importar tareas{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-3">Importar tareas</h1>
+
+<div class="bg-white rounded shadow p-4 mb-4">
+  <p class="text-sm text-gray-600 mb-2">Subí un archivo <b>.xlsx</b> o <b>.csv</b> con estas columnas:</p>
+  <ul class="list-disc ml-6 text-sm">
+    <li><b>titulo</b></li>
+    <li><b>fecha_inicio</b> (YYYY-MM-DD o DD/MM/YYYY)</li>
+    <li><b>estado</b> (pendiente / en progreso / finalizado)</li>
+    <li><b>prioridad</b> (baja / media / alta)</li>
+    <li><b>comentarios</b></li>
+    <li><i>fecha_fin</i> (opcional)</li>
+  </ul>
+  <div class="mt-2">
+    <a class="px-3 py-2 bg-gray-200 rounded text-sm" href="{{ url_for('tasksimp.import_sample') }}">Descargar ejemplo CSV</a>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="bg-white rounded shadow p-4">
+  <div class="mb-3">
+    <input type="file" name="file" accept=".xlsx,.csv" required class="border rounded px-2 py-2 w-full">
+  </div>
+  <button class="px-3 py-2 bg-blue-600 text-white rounded">Importar</button>
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ back_url }}">Volver</a>
+</form>
+{% endblock %}

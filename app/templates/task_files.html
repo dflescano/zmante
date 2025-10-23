@@ -1,0 +1,54 @@
+
+{% extends 'layout.html' %}
+{% block title %}Archivos — Tarea #{{ task.id }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-1">Archivos de la tarea #{{ task.id }} — {{ task.title or 'Sin título' }}</h1>
+<div class="text-xs text-gray-500 mb-2">
+  Origen: {{ 'Base de datos' if mode == 'db' else 'Carpeta plana' }} — Carpeta: {{ resolved_dir }}
+</div>
+
+<div class="mb-3 flex gap-2">
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ back_url }}">Volver</a>
+  {% if current_user.role == 'admin' %}
+  <form method="post" action="{{ url_for('tasksx.delete_task', task_id=task.id) }}" onsubmit="return confirm('¿Eliminar la tarea? Esta acción no se puede deshacer.');">
+    <button class="px-3 py-2 bg-red-600 text-white rounded">Eliminar tarea</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if files %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  {% for fn in files %}
+    <div class="bg-white rounded shadow p-3">
+      <div class="text-sm break-all mb-2">{{ fn }}</div>
+      {% set url = url_for('tasksx.file_serve', task_id=task.id, filename=fn) %}
+      {% if fn.lower().endswith(('.png','.jpg','.jpeg','.gif','.webp','.bmp')) %}
+        <a href="{{ url }}" target="_blank"><img src="{{ url }}" alt="{{ fn }}" class="w-full rounded"></a>
+      {% elif fn.lower().endswith('.pdf') %}
+        <div class="aspect-video bg-gray-100 flex items-center justify-center text-gray-600 text-sm mb-2">
+          <embed src="{{ url }}" type="application/pdf" class="w-full h-64"/>
+        </div>
+        <a class="text-blue-700 hover:underline text-sm" href="{{ url }}" target="_blank">Abrir PDF</a>
+      {% elif fn.lower().endswith(('.txt','.log','.md')) %}
+        <iframe src="{{ url }}" class="w-full h-48 border"></iframe>
+        <a class="text-blue-700 hover:underline text-sm" href="{{ url }}" target="_blank">Abrir</a>
+      {% else %}
+        <a class="text-blue-700 hover:underline text-sm" href="{{ url }}" target="_blank">Descargar / Abrir</a>
+      {% endif %}
+
+      {% if current_user.role == 'admin' %}
+      <form method="post"
+            action="{{ url_for('tasksx.delete_file', task_id=task.id, filename=fn) }}"
+            onsubmit="return confirm('¿Eliminar este archivo?');"
+            class="mt-2">
+        <button class="px-2 py-1 bg-red-600 text-white rounded text-xs">Eliminar archivo</button>
+      </form>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-gray-600">No se encontraron archivos en esta tarea.</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,72 @@
+
+{% extends 'layout.html' %}
+{% block title %}Reporte de tareas{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Reporte de tareas</h1>
+
+<form method="get" class="bg-white rounded shadow p-3 grid grid-cols-1 md:grid-cols-4 gap-2 mb-3">
+  <div>
+    <label class="text-sm text-gray-600">Desde</label>
+    <input type="date" name="start" value="{{ start if start else '' }}" class="border rounded w-full px-2 py-1">
+  </div>
+  <div>
+    <label class="text-sm text-gray-600">Hasta</label>
+    <input type="date" name="end" value="{{ end if end else '' }}" class="border rounded w-full px-2 py-1">
+  </div>
+  <div class="flex items-end">
+    <button class="px-3 py-2 bg-blue-600 text-white rounded">Filtrar</button>
+  </div>
+  <div class="flex items-end">
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('reports.tasks_csv', start=start, end=end) }}">Exportar CSV</a>
+	<a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('exportx.export_tasks_xls', start=start, end=end) }}" class="btn">Excel</a>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('exportx.export_tasks_pdf', start=start, end=end) }}" class="btn">PDF</a>
+  </div>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+  <div class="bg-white rounded shadow p-3">
+    <h2 class="font-semibold mb-1">Por estado</h2>
+    <ul class="text-sm list-disc ml-5">
+      {% for k,v in by_status.items() %}<li>{{ k }}: <b>{{ v }}</b></li>{% endfor %}
+      {% if not by_status %}<li>—</li>{% endif %}
+    </ul>
+  </div>
+  <div class="bg-white rounded shadow p-3">
+    <h2 class="font-semibold mb-1">Por prioridad</h2>
+    <ul class="text-sm list-disc ml-5">
+      {% for k,v in by_priority.items() %}<li>{{ k }}: <b>{{ v }}</b></li>{% endfor %}
+      {% if not by_priority %}<li>—</li>{% endif %}
+    </ul>
+  </div>
+  <div class="bg-white rounded shadow p-3">
+    <h2 class="font-semibold mb-1">Top PCs (20)</h2>
+    <ul class="text-sm list-disc ml-5">
+      {% for k,v in by_pc %}<li>{{ k }}: <b>{{ v }}</b></li>{% endfor %}
+      {% if not by_pc %}<li>—</li>{% endif %}
+    </ul>
+  </div>
+</div>
+
+<div class="bg-white rounded shadow p-3">
+  <h2 class="font-semibold mb-1">Tareas por mes</h2>
+  {% if months %}
+    <div class="text-sm text-gray-700 mb-2">Período: {{ months[0] }} → {{ months[-1] }}</div>
+    <div class="w-full overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead><tr><th class="px-2 py-1 text-left">Mes</th><th class="px-2 py-1 text-left">Cantidad</th></tr></thead>
+        <tbody>
+        {% for i in range(months|length) %}
+          <tr class="border-t"><td class="px-2 py-1">{{ months[i] }}</td><td class="px-2 py-1">{{ series[i] }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-gray-600 text-sm">Sin datos en el rango.</div>
+  {% endif %}
+</div>
+
+<div class="mt-4">
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('reports.dashboard') }}">Volver al panel</a>
+</div>
+{% endblock %}

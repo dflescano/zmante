@@ -1,0 +1,1 @@
+en el init me avisa de los intervalos en minutos para los alertas

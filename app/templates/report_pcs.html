@@ -1,0 +1,52 @@
+
+{% extends 'layout.html' %}
+{% block title %}Reporte de PCs{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Reporte de PCs</h1>
+
+<form method="get" class="bg-white rounded shadow p-3 mb-3 flex flex-wrap gap-2">
+  <label class="flex items-center gap-2 text-sm">
+    <input type="checkbox" name="alerts" value="1" {% if only_alerts %}checked{% endif %}>
+    Mostrar solo en alerta (mant ≥ {{ maint_days }}d o backup ≥ {{ backup_days }}d)
+  </label>
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('reports.pcs_csv', alerts='1' if only_alerts else None) }}">Exportar CSV</a>
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('exportx.export_pcs_xls') }}" class="btn">Excel</a>
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('exportx.export_pcs_pdf') }}" class="btn">PDF</a>
+</form>
+
+<div class="bg-white rounded shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-3 py-2 text-left">PC</th>
+        <th class="px-3 py-2 text-left">Últ. mant.</th>
+        <th class="px-3 py-2 text-left">Días mant.</th>
+        <th class="px-3 py-2 text-left">Alerta mant.</th>
+        <th class="px-3 py-2 text-left">Últ. backup</th>
+        <th class="px-3 py-2 text-left">Días backup</th>
+        <th class="px-3 py-2 text-left">Alerta backup</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for r in rows %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-3 py-2">{{ r.pc.name }}</td>
+        <td class="px-3 py-2">{{ r.lm or '—' }}</td>
+        <td class="px-3 py-2">{{ r.age_m }}</td>
+        <td class="px-3 py-2">{{ 'Sí' if r.alert_m else 'No' }}</td>
+        <td class="px-3 py-2">{{ r.lb or '—' }}</td>
+        <td class="px-3 py-2">{{ r.age_b }}</td>
+        <td class="px-3 py-2">{{ 'Sí' if r.alert_b else 'No' }}</td>
+      </tr>
+      {% endfor %}
+      {% if rows|length == 0 %}
+      <tr><td colspan="7" class="px-3 py-4 text-center text-gray-500">Sin datos.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4">
+  <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('reports.dashboard') }}">Volver al panel</a>
+</div>
+{% endblock %}

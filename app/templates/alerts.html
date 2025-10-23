@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% block title %}Alertas{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Alertas</h1>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 text-left">Fecha</th>
+        <th class="px-4 py-2 text-left">PC</th>
+        <th class="px-4 py-2 text-left">Tipo</th>
+        <th class="px-4 py-2 text-left">Mensaje</th>
+        <th class="px-4 py-2 text-left">Estado</th>
+        <th class="px-4 py-2 text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for a in alerts %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">
+          {{ a.created_at|localtime("%d/%m/%Y %H:%M") }}
+        </td>
+        <td class="px-4 py-2">{{ a.pc.name }}</td>
+        <td class="px-4 py-2">{{ "Mantenimiento" if a.kind == "maintenance" else "Backup" }}</td>
+        <td class="px-4 py-2">{{ a.message }}</td>
+        <td class="px-4 py-2">
+          {% if a.resolved %}
+            <span class="px-2 py-1 bg-green-100 text-green-800 rounded">Resuelta</span><br>
+            <small>{{ a.resolved_at|localtime("%d/%m/%Y %H:%M") }}</small>
+          {% else %}
+            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">Pendiente</span>
+          {% endif %}
+        </td>
+        <td class="px-4 py-2 text-right">
+          <div class="flex gap-2 justify-end">
+            {% if not a.resolved %}
+            <form method="post" action="{{ url_for('main.alerts_resolve', alert_id=a.id) }}">
+              <button class="px-3 py-1 bg-gray-900 text-white rounded">Resolver</button>
+            </form>
+            {% endif %}
+            {% if current_user.is_authenticated and (current_user.role == 'admin') %}
+            <form method="post" action="{{ url_for('admin.alerts_delete', alert_id=a.id) }}"
+                  onsubmit="return confirm('¿Eliminar esta alerta?');">
+              <button class="px-3 py-1 bg-red-600 text-white rounded">Eliminar</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

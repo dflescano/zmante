@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block title %}{{ 'Editar PC' if pc else 'Nueva PC' }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ 'Editar PC' if pc else 'Nueva PC' }}</h1>
+<form method="post" class="bg-white rounded-lg shadow p-4 grid md:grid-cols-2 gap-4">
+  <div><label class="block text-sm font-medium">Nombre de la PC *</label><input name="name" value="{{ pc.name if pc else '' }}" class="w-full border rounded px-3 py-2" required /></div>
+  <div><label class="block text-sm font-medium">Usuario de la PC (login)</label><input name="pc_username" value="{{ pc.pc_username if pc else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">Usuario físico</label><input name="physical_user" value="{{ pc.physical_user if pc else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">TeamViewer ID</label><input name="teamviewer_id" value="{{ pc.teamviewer_id if pc else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">AnyDesk ID</label><input name="anydesk_id" value="{{ pc.anydesk_id if pc else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="windows_licensed" {% if pc and pc.windows_licensed %}checked{% endif %} /><label class="text-sm">Windows legal</label></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="office_licensed" {% if pc and pc.office_licensed %}checked{% endif %} /><label class="text-sm">Office legal</label></div>
+  <div><label class="block text-sm font-medium">Ubicación</label><input name="location" value="{{ pc.location if pc else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="md:col-span-2"><label class="block text-sm font-medium">Observaciones</label><textarea name="notes" rows="3" class="w-full border rounded px-3 py-2">{{ pc.notes if pc else '' }}</textarea></div>
+  <div class="md:col-span-2 flex gap-2"><button class="px-4 py-2 bg-gray-900 text-white rounded-lg">Guardar</button><a href="{{ url_for('main.pcs_list') }}" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Usuarios</h1>
+  <a href="{{ url_for('admin.users_new') }}" class="px-3 py-2 bg-gray-900 text-white rounded-lg">Nuevo usuario</a>
+</div>
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-100"><tr><th class="px-4 py-2 text-left">Usuario</th><th class="px-4 py-2 text-left">Rol</th><th class="px-4 py-2 text-left">Acciones</th></tr></thead>
+    <tbody class="divide-y divide-gray-200">
+      {% for u in users %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2">{{ u.username }}</td>
+        <td class="px-4 py-2">{{ u.role }}</td>
+        <td class="px-4 py-2">
+          <a class="text-blue-600 hover:underline mr-2" href="{{ url_for('admin.users_edit', uid=u.id) }}">Editar</a>
+          {% if u.username != 'admin' %}
+          <form method="post" action="{{ url_for('admin.users_delete', uid=u.id) }}" style="display:inline" onsubmit="return confirm('¿Borrar usuario?');">
+            <button class="text-red-600 hover:underline">Borrar</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

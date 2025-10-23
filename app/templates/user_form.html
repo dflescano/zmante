@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% if user %}{% set title='Editar usuario' %}{% else %}{% set title='Nuevo usuario' %}{% endif %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{{ title }}</h1>
+<form method="post" class="bg-white rounded-lg shadow p-4 grid md:grid-cols-2 gap-4">
+  <div>
+    <label class="block text-sm font-medium">Usuario</label>
+    <input name="username" value="{{ user.username if user else '' }}" class="w-full border rounded px-3 py-2" {% if user %}readonly{% endif %} required />
+  </div>
+  <div>
+    <label class="block text-sm font-medium">Rol</label>
+    <select name="role" class="w-full border rounded px-3 py-2">
+      <option value="user" {% if user and user.role=='user' %}selected{% endif %}>user</option>
+      <option value="admin" {% if user and user.role=='admin' %}selected{% endif %}>admin</option>
+    </select>
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-sm font-medium">Contraseña {% if user %}(dejar en blanco para no cambiar){% endif %}</label>
+    <input name="password" type="password" class="w-full border rounded px-3 py-2" />
+  </div>
+  <div class="md:col-span-2 flex gap-2">
+    <button class="px-4 py-2 bg-gray-900 text-white rounded-lg">Guardar</button>
+    <a href="{{ url_for('admin.users_list') }}" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

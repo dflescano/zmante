@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Mantenimiento de PC{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <nav class="bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
+      <a href="{{ url_for('main.index') }}" class="font-bold">Dashboard</a>
+      <a href="{{ url_for('main.pcs_list') }}" class="hover:underline">PCs</a>
+      <a href="{{ url_for('main.alerts_list') }}" class="hover:underline">Alertas</a>
+	  <a href="{{ url_for('tasks.list_tasks') }}" class="hover:underline">Tareas</a>
+	  <a href="{{ url_for('tasksimp.import_form') }}">Importar tareas</a>
+	  <a href="{{ url_for('reports.dashboard') }}" class="hover:underline">Reportes</a>
+	  <a href="{{ url_for('inventory.list_items') }}" class="hover:underline">Inventario</a>
+      {% if current_user.is_authenticated and current_user.role == "admin" %}
+      <a href="{{ url_for('admin.users_list') }}" class="hover:underline">Usuarios</a>
+      <a href="{{ url_for('admin.mail_test') }}" class="hover:underline">Correo (test)</a>
+      <a href="{{ url_for('admin.settings') }}" class="hover:underline">Configuración</a>
+      <a href="{{ url_for('admin.email_logs') }}" class="hover:underline">Logs correo</a>
+      <a href="{{ url_for('admin.diagnostics') }}" class="hover:underline">Diagnóstico</a>
+      {% endif %}
+      <span class="flex-1"></span>
+      {% if current_user.is_authenticated %}
+        <span class="text-sm mr-2">Hola, {{ current_user.username }} ({{ current_user.role }})</span>
+        <a href="{{ url_for('auth.logout') }}" class="hover:underline">Salir</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="hover:underline">Ingresar</a>
+      {% endif %}
+    </div>
+    
+</nav>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="space-y-2 mb-4">
+          {% for category, message in messages %}
+            <div class="px-4 py-2 rounded {{ 'bg-green-100 text-green-700' if category=='success' else 'bg-red-100 text-red-700' }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

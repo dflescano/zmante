@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block title %}Probar correo (SMTP){% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Probar correo (SMTP)</h1>
+<p class="text-sm text-gray-600 mb-4">Usa los valores de entorno por defecto. Podés sobrescribirlos aquí solo para esta prueba (no se guardan).</p>
+<form method="post" class="bg-white rounded-lg shadow p-4 grid md:grid-cols-2 gap-4">
+  <div><label class="block text-sm font-medium">SMTP_HOST</label><input name="SMTP_HOST" value="{{ defaults.SMTP_HOST }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">SMTP_PORT</label><input name="SMTP_PORT" value="{{ defaults.SMTP_PORT }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="SMTP_TLS" {% if defaults.SMTP_TLS|lower in ['true','1','yes','on'] %}checked{% endif %} /><label class="text-sm">SMTP_TLS</label></div>
+  <div></div>
+  <div><label class="block text-sm font-medium">SMTP_USER</label><input name="SMTP_USER" value="{{ defaults.SMTP_USER }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">SMTP_PASS</label><input name="SMTP_PASS" type="password" value="{{ defaults.SMTP_PASS }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">MAIL_FROM</label><input name="MAIL_FROM" value="{{ defaults.MAIL_FROM }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">MAIL_TO</label><input name="MAIL_TO" value="{{ defaults.MAIL_TO }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="md:col-span-2"><label class="block text-sm font-medium">Asunto</label><input name="SUBJECT" value="{{ defaults.SUBJECT }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="md:col-span-2"><label class="block text-sm font-medium">Cuerpo</label><textarea name="BODY" rows="4" class="w-full border rounded px-3 py-2">{{ defaults.BODY }}</textarea></div>
+  <div class="md:col-span-2 flex gap-2">
+    <button class="px-4 py-2 bg-gray-900 text-white rounded-lg">Enviar prueba</button>
+    <a href="{{ url_for('admin.settings') }}" class="px-4 py-2 bg-gray-200 rounded-lg">Volver</a>
+  </div>
+</form>
+{% endblock %}

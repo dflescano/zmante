@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block title %}Logs de correo{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto p-4">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold">Logs de correo</h1>
+    <form method="post" action="{{ url_for('admin.email_logs_clear') }}"
+          onsubmit="return confirm('¿Borrar todos los logs de correo?');">
+      <button class="px-3 py-2 bg-red-600 text-white rounded">Borrar todos</button>
+    </form>
+  </div>
+
+  {% if logs %}
+    <div class="overflow-x-auto border rounded">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="text-left p-2">Fecha</th>
+            <th class="text-left p-2">Asunto</th>
+            <th class="text-left p-2">Para</th>
+            <th class="text-left p-2">Estado</th>
+            <th class="text-left p-2">Info</th>
+            <th class="text-left p-2">Error</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for l in logs %}
+          <tr class="border-t">
+            <td class="p-2 whitespace-nowrap">{{ l.created_at|localtime("%d/%m/%Y %H:%M:%S") }}</td>
+            <td class="p-2">{{ l.subject }}</td>
+            <td class="p-2">{{ l.recipients }}</td>
+            <td class="p-2">
+              {% if l.ok %}
+                <span class="px-2 py-1 bg-green-100 text-green-800 rounded">OK</span>
+              {% else %}
+                <span class="px-2 py-1 bg-red-100 text-red-800 rounded">ERROR</span>
+              {% endif %}
+            </td>
+            <td class="p-2"><pre class="whitespace-pre-wrap">{{ l.info or '' }}</pre></td>
+            <td class="p-2"><pre class="whitespace-pre-wrap text-red-700">{{ l.error or '' }}</pre></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>No hay logs.</p>
+  {% endif %}
+</div>
+{% endblock %}

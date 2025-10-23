@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+{% block title %}Configuración (Correo y Alertas){% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Configuración (Correo y Alertas)</h1>
+<form method="post" class="bg-white rounded-lg shadow p-4 grid md:grid-cols-2 gap-4">
+  <div><label class="block text-sm font-medium">SMTP_HOST</label><input name="smtp_host" value="{{ cfg.smtp_host if cfg else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">SMTP_PORT</label><input name="smtp_port" value="{{ (cfg.smtp_port if cfg else 587) }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="smtp_tls" {% if not cfg or cfg.smtp_tls %}checked{% endif %} /><label class="text-sm">SMTP_TLS</label></div>
+  <div></div>
+  <div><label class="block text-sm font-medium">SMTP_USER</label><input name="smtp_user" value="{{ cfg.smtp_user if cfg else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">SMTP_PASS</label><input type="password" name="smtp_pass" value="{{ cfg.smtp_pass if cfg else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">MAIL_FROM</label><input name="mail_from" value="{{ cfg.mail_from if cfg else '' }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">MAIL_TO</label><input name="mail_to" value="{{ cfg.mail_to if cfg else '' }}" class="w-full border rounded px-3 py-2" /></div>
+
+  <div><label class="block text-sm font-medium">Días sin mantenimiento</label><input type="number" min="1" name="maintenance_days" value="{{ (cfg.maintenance_days if cfg else 7) }}" class="w-full border rounded px-3 py-2" /></div>
+  <div><label class="block text-sm font-medium">Días sin backup</label><input type="number" min="1" name="backup_days" value="{{ (cfg.backup_days if cfg else 7) }}" class="w-full border rounded px-3 py-2" /></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="alerts_enabled" {% if not cfg or cfg.alerts_enabled %}checked{% endif %} /><label class="text-sm">Activar envío de alertas</label></div>
+  <div class="flex items-center gap-2"><input type="checkbox" name="summary_daily" {% if cfg and cfg.summary_daily %}checked{% endif %} /><label class="text-sm">Enviar resumen diario</label></div>
+
+  <div class="md:col-span-2 flex gap-2">
+    <button class="px-4 py-2 bg-gray-900 text-white rounded-lg">Guardar</button>
+    <a href="{{ url_for('admin.mail_test') }}" class="px-4 py-2 bg-blue-700 text-white rounded-lg">Probar envío</a>
+    <a href="{{ url_for('admin.email_logs') }}" class="px-4 py-2 bg-gray-200 rounded-lg">Ver logs de correo</a>
+    <form method="post" action="{{ url_for('admin.run_checks_now') }}">
+      <button class="px-4 py-2 bg-yellow-600 text-white rounded-lg">Recalcular alertas ahora</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.send_summary_now') }}">
+      <button class="px-4 py-2 bg-indigo-700 text-white rounded-lg">Enviar resumen ahora</button>
+    </form>
+    <a href="{{ url_for('admin.diagnostics') }}" class="px-4 py-2 bg-gray-300 rounded-lg">Diagnóstico</a>
+  </div>
+</form>
+{% endblock %}

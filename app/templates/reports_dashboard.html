@@ -1,0 +1,50 @@
+
+{% extends 'layout.html' %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Reportes — Panel</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+  <div class="bg-white rounded shadow p-4">
+    <div class="text-sm text-gray-600">Tareas totales</div>
+    <div class="text-3xl font-bold">{{ total_tasks }}</div>
+  </div>
+  <div class="bg-white rounded shadow p-4">
+    <div class="text-sm text-gray-600">PCs en alerta (Mant ≥ {{ maint_days }}d)</div>
+    <div class="text-3xl font-bold">{{ pcs_alert_m }}/{{ pcs_total }}</div>
+  </div>
+  <div class="bg-white rounded shadow p-4">
+    <div class="text-sm text-gray-600">PCs en alerta (Backup ≥ {{ backup_days }}d)</div>
+    <div class="text-3xl font-bold">{{ pcs_alert_b }}/{{ pcs_total }}</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Tareas por estado</h2>
+    <ul class="list-disc ml-5 text-sm">
+      {% for k,v in status_counts.items() %}<li><b>{{ k }}</b>: {{ v }}</li>{% endfor %}
+      {% if not status_counts %}<li>—</li>{% endif %}
+    </ul>
+  </div>
+  <div class="bg-white rounded shadow p-4">
+    <h2 class="font-semibold mb-2">Tareas por prioridad</h2>
+    <ul class="list-disc ml-5 text-sm">
+      {% for k,v in priority_counts.items() %}<li><b>{{ k }}</b>: {{ v }}</li>{% endfor %}
+      {% if not priority_counts %}<li>—</li>{% endif %}
+    </ul>
+  </div>
+</div>
+
+<div class="bg-white rounded shadow p-4 mt-4">
+  <h2 class="font-semibold mb-2">Tiempo promedio de resolución</h2>
+  <div class="text-sm">
+    {% if avg_resolve is not none %}{{ "%.1f"|format(avg_resolve) }} días{% else %}—{% endif %}
+  </div>
+</div>
+
+<div class="mt-6 flex gap-3">
+  <a class="px-3 py-2 bg-blue-600 text-white rounded" href="{{ url_for('reports.tasks_report') }}">Reporte de tareas</a>
+  <a class="px-3 py-2 bg-indigo-700 text-white rounded" href="{{ url_for('reports.pcs_report') }}">Reporte de PCs</a>
+</div>
+{% endblock %}

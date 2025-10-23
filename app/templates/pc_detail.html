@@ -1,0 +1,135 @@
+{% extends 'layout.html' %}
+{% block title %}PC: {{ pc.name }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">PC: {{ pc.name }}</h1>
+  <div class="flex gap-2">
+    {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('main.pc_edit', pc_id=pc.id) }}" class="px-3 py-2 bg-gray-700 text-white rounded-lg">Editar</a>
+      <form method="post" action="{{ url_for('main.pc_delete', pc_id=pc.id) }}" onsubmit="return confirm('¿Eliminar PC y su historial?');">
+        <button class="px-3 py-2 bg-red-600 text-white rounded-lg">Eliminar</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-2">Datos de la PC</h2>
+    <dl class="grid grid-cols-3 gap-2 text-sm">
+      <dt class="text-gray-500">Usuario PC</dt><dd class="col-span-2">{{ pc.pc_username or '-' }}</dd>
+      <dt class="text-gray-500">Usuario físico</dt><dd class="col-span-2">{{ pc.physical_user or '-' }}</dd>
+      <dt class="text-gray-500">TeamViewer</dt><dd class="col-span-2">{{ pc.teamviewer_id or '-' }}</dd>
+      <dt class="text-gray-500">AnyDesk</dt><dd class="col-span-2">{{ pc.anydesk_id or '-' }}</dd>
+      <dt class="text-gray-500">Windows legal</dt><dd class="col-span-2">{{ pc.windows_licensed|yn }}</dd>
+      <dt class="text-gray-500">Office legal</dt><dd class="col-span-2">{{ pc.office_licensed|yn }}</dd>
+      <dt class="text-gray-500">Ubicación</dt><dd class="col-span-2">{{ pc.location or '-' }}</dd>
+      <dt class="text-gray-500">Observaciones</dt><dd class="col-span-2 whitespace-pre-wrap">{{ pc.notes or '-' }}</dd>
+      <dt class="text-gray-500">Estado</dt><dd class="col-span-2">{{ compute_status(pc) }}</dd>
+    </dl>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-2">Acciones rápidas</h2>
+    <form method="post" action="{{ url_for('main.maintenance_new', pc_id=pc.id) }}" class="mb-3 space-y-2">
+      <div class="text-sm font-medium">Registrar mantenimiento</div>
+      <input name="performed_by" placeholder="Técnico" class="w-full border rounded px-3 py-2" />
+      <textarea name="description" rows="2" placeholder="Descripción..." class="w-full border rounded px-3 py-2"></textarea>
+      <button class="px-3 py-2 bg-gray-900 text-white rounded-lg w-full">Guardar mantenimiento</button>
+    </form>
+    <form method="post" action="{{ url_for('main.backup_new', pc_id=pc.id) }}" class="space-y-2">
+      <div class="text-sm font-medium">Registrar backup</div>
+      <select name="status" class="w-full border rounded px-3 py-2"><option>OK</option><option>ERROR</option></select>
+      <input name="size_mb" type="number" step="0.01" placeholder="Tamaño (MB)" class="w-full border rounded px-3 py-2" />
+      <input name="path" placeholder="Ruta destino (opcional)" class="w-full border rounded px-3 py-2" />
+      <button class="px-3 py-2 bg-gray-900 text-white rounded-lg w-full">Guardar backup</button>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-2">Historial de mantenimientos</h2>
+    <div class="border rounded">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-3 py-2 text-left">Fecha</th>
+            <th class="px-3 py-2 text-left">Técnico</th>
+            <th class="px-3 py-2 text-left">Detalle</th>
+            <th class="px-3 py-2 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {% for m in pc.maintenances|sort(attribute='date_performed', reverse=True) %}
+          <tr>
+            <td class="px-3 py-2">{{ m.date_performed.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="px-3 py-2">{{ m.performed_by or '-' }}</td>
+            <td class="px-3 py-2 whitespace-pre-wrap">{{ m.description or '-' }}</td>
+            <td class="px-3 py-2">
+              {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('main.maintenance_edit', m_id=m.id) }}" class="text-blue-600 hover:underline mr-2">Editar</a>
+                <form method="post" action="{{ url_for('main.maintenance_delete', m_id=m.id) }}" style="display:inline" onsubmit="return confirm('¿Borrar mantenimiento?');">
+                  <button class="text-red-600 hover:underline">Borrar</button>
+                </form>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td class="px-3 py-2 text-gray-500" colspan="4">Sin registros</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-2">Historial de backups</h2>
+    <div class="border rounded">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-3 py-2 text-left">Fecha</th>
+            <th class="px-3 py-2 text-left">Estado</th>
+            <th class="px-3 py-2 text-left">Tamaño (MB)</th>
+            <th class="px-3 py-2 text-left">Ruta</th>
+            <th class="px-3 py-2 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {% for b in pc.backups|sort(attribute='date_performed', reverse=True) %}
+          <tr>
+            <td class="px-3 py-2">{{ b.date_performed.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="px-3 py-2">{{ b.status }}</td>
+            <td class="px-3 py-2">{{ '%.2f'|format(b.size_mb) if b.size_mb is not none else '-' }}</td>
+            <td class="px-3 py-2">{{ b.path or '-' }}</td>
+            <td class="px-3 py-2">
+              {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('main.backup_edit', b_id=b.id) }}" class="text-blue-600 hover:underline mr-2">Editar</a>
+                <form method="post" action="{{ url_for('main.backup_delete', b_id=b.id) }}" style="display:inline" onsubmit="return confirm('¿Borrar backup?');">
+                  <button class="text-red-600 hover:underline">Borrar</button>
+                </form>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td class="px-3 py-2 text-gray-500" colspan="5">Sin registros</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-4 md:col-span-2">
+    <h2 class="font-semibold mb-2">Últimos cambios (auditoría)</h2>
+    <div class="border rounded">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-100"><tr><th class="px-3 py-2 text-left">Fecha</th><th class="px-3 py-2 text-left">Usuario</th><th class="px-3 py-2 text-left">Acción</th><th class="px-3 py-2 text-left">Detalle</th></tr></thead>
+        <tbody class="divide-y">
+          {% for log in logs %}
+          <tr><td class="px-3 py-2">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td class="px-3 py-2">{{ log.username }}</td><td class="px-3 py-2">{{ log.action }} {{ log.entity }} #{{ log.entity_id }}</td><td class="px-3 py-2 whitespace-pre-wrap">{{ log.details or '' }}</td></tr>
+          {% else %}<tr><td class="px-3 py-2 text-gray-500" colspan="4">Sin actividad</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

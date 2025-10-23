@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block title %}Editar mantenimiento{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Editar mantenimiento - {{ pc.name }}</h1>
+<form method="post" class="bg-white rounded-lg shadow p-4 space-y-3">
+  <div>
+    <label class="block text-sm font-medium">Técnico</label>
+    <input name="performed_by" value="{{ m.performed_by or '' }}" class="w-full border rounded px-3 py-2" />
+  </div>
+  <div>
+    <label class="block text-sm font-medium">Detalle</label>
+    <textarea name="description" rows="3" class="w-full border rounded px-3 py-2">{{ m.description or '' }}</textarea>
+  </div>
+  <div class="flex gap-2">
+    <button class="px-4 py-2 bg-gray-900 text-white rounded-lg">Guardar</button>
+    <a href="{{ url_for('main.pc_detail', pc_id=pc.id) }}" class="px-4 py-2 bg-gray-200 rounded-lg">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

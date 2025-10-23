@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+{% block title %}{{ 'Editar' if item else 'Nuevo' }} inventario{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-3">{{ 'Editar' if item else 'Nuevo' }} ítem</h1>
+
+<form method="post" class="bg-white rounded shadow p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+  <div>
+    <label class="font-semibold">Tipo</label>
+    <select name="kind" class="border rounded w-full px-2 py-1">
+      {% for k in KINDS %}
+      <option value="{{ k }}" {% if item and item.kind==k %}selected{% endif %}>{{ k }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="font-semibold">Nombre</label>
+    <input name="name" class="border rounded w-full px-2 py-1" value="{{ item.name if item else '' }}" required>
+  </div>
+  <div>
+    <label class="font-semibold">Marca</label>
+    <input name="brand" class="border rounded w-full px-2 py-1" value="{{ item.brand if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Modelo</label>
+    <input name="model" class="border rounded w-full px-2 py-1" value="{{ item.model if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">N° Serie</label>
+    <input name="serial" class="border rounded w-full px-2 py-1" value="{{ item.serial if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Tag/Activo</label>
+    <input name="asset_tag" class="border rounded w-full px-2 py-1" value="{{ item.asset_tag if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Ubicación</label>
+    <input name="location" class="border rounded w-full px-2 py-1" value="{{ item.location if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Asignado a</label>
+    <input name="assigned_to" class="border rounded w-full px-2 py-1" value="{{ item.assigned_to if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Estado</label>
+    <select name="status" class="border rounded w-full px-2 py-1">
+      {% for s in STATUSES %}
+      <option value="{{ s }}" {% if item and item.status==s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label class="font-semibold">Licencia (solo software)</label>
+    <input name="license_key" class="border rounded w-full px-2 py-1" value="{{ item.license_key if item else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Seats</label>
+    <input name="seats" type="number" class="border rounded w-full px-2 py-1" value="{{ item.seats if item and item.seats else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Vence (licencia)</label>
+    <input name="expiry_date" type="date" class="border rounded w-full px-2 py-1" value="{{ item.expiry_date if item and item.expiry_date else '' }}">
+  </div>
+
+  <div>
+    <label class="font-semibold">Compra</label>
+    <input name="purchase_date" type="date" class="border rounded w-full px-2 py-1" value="{{ item.purchase_date if item and item.purchase_date else '' }}">
+  </div>
+  <div>
+    <label class="font-semibold">Garantía hasta</label>
+    <input name="warranty_end" type="date" class="border rounded w-full px-2 py-1" value="{{ item.warranty_end if item and item.warranty_end else '' }}">
+  </div>
+
+  <div class="md:col-span-3">
+    <label class="font-semibold">Notas</label>
+    <textarea name="notes" rows="3" class="border rounded w-full px-2 py-1">{{ item.notes if item else '' }}</textarea>
+  </div>
+
+  <div class="md:col-span-3 flex gap-2">
+    <button class="px-3 py-2 bg-blue-600 text-white rounded">Guardar</button>
+    <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.list_items') }}">Volver</a>
+    {% if item %}
+      <a class="px-3 py-2 bg-gray-300 rounded" href="{{ url_for('inventory.view_item', item_id=item.id) }}">Ver</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}
